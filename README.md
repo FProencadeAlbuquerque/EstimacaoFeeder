@@ -1,6 +1,6 @@
 # EstimacaoFeeder
 
-Projeto voltado à estimação de parâmetros elétricos de um feeder utilizando medições elétricas, fluxo de potência e técnicas de otimização/regressão.
+Projeto voltado à estimação de parâmetros elétricos de um feeder utilizando medições elétricas, fluxo de potência e técnicas de otimização e regressão.
 
 ---
 
@@ -10,10 +10,10 @@ O objetivo principal deste projeto é estimar parâmetros elétricos equivalente
 
 A metodologia considera:
 
-* Modelo elétrico do feeder;
-* Fluxo de potência;
-* Estimação iterativa dos parâmetros;
-* Avaliação do erro entre valores medidos e calculados.
+- Modelo elétrico do feeder;
+- Fluxo de potência;
+- Estimação iterativa dos parâmetros;
+- Avaliação do erro entre valores medidos e calculados.
 
 ---
 
@@ -29,8 +29,8 @@ $$
 
 onde:
 
-* $P$ é a potência ativa;
-* $Q$ é a potência reativa.
+- $P$ é a potência ativa;
+- $Q$ é a potência reativa.
 
 A relação entre tensão e corrente é dada por:
 
@@ -40,8 +40,8 @@ $$
 
 onde:
 
-* $V$ é a tensão complexa;
-* $I^*$ é o conjugado da corrente.
+- $V$ é a tensão complexa;
+- $I^*$ é o conjugado da corrente.
 
 ---
 
@@ -55,8 +55,8 @@ $$
 
 onde:
 
-* $R$ é a resistência da linha;
-* $X$ é a reatância da linha.
+- $R$ é a resistência da linha;
+- $X$ é a reatância da linha.
 
 A corrente elétrica é calculada por:
 
@@ -91,13 +91,20 @@ $$
 A função objetivo utilizada é baseada no erro quadrático:
 
 $$
-J(\theta) = \sum_{k=1}^{N} ||z_k^{med} - z_k^{calc}(\theta)||^2
+J(\theta)
+=
+\sum_{k=1}^{N}
+\left(
+z_k^{med}
+-
+z_k^{calc}(\theta)
+\right)^2
 $$
 
 onde:
 
-* $z_k^{med}$ representa as medições;
-* $z_k^{calc}$ representa os valores calculados pelo modelo.
+- $z_k^{med}$ representa as medições;
+- $z_k^{calc}$ representa os valores calculados pelo modelo.
 
 ---
 
@@ -106,7 +113,14 @@ onde:
 O erro relativo percentual é calculado por:
 
 $$
-Erro(\%) = \frac{|x_{real} - x_{est}|}{|x_{real}|} \times 100
+\mathrm{Erro}(\%)
+=
+\frac{
+|x_{real} - x_{est}|
+}{
+|x_{real}|
+}
+\times 100
 $$
 
 ---
@@ -126,12 +140,12 @@ EstimacaoFeeder/
 
 # Tecnologias Utilizadas
 
-* Python
-* NumPy
-* Pandas
-* SciPy
-* Matplotlib
-* Jupyter Notebook
+- Python
+- NumPy
+- Pandas
+- SciPy
+- Matplotlib
+- Jupyter Notebook
 
 ---
 
@@ -167,10 +181,10 @@ python Estima.py
 
 O projeto fornece:
 
-* Parâmetros estimados do feeder;
-* Erros percentuais;
-* Comparação entre valores reais e estimados;
-* Arquivos CSV contendo os resultados completos.
+- Parâmetros estimados do feeder;
+- Erros percentuais;
+- Comparação entre valores reais e estimados;
+- Arquivos CSV contendo os resultados completos.
 
 ---
 
@@ -178,16 +192,16 @@ O projeto fornece:
 
 A metodologia pode ser aplicada em:
 
-* Sistemas de distribuição;
-* Smart grids;
-* Identificação de parâmetros;
-* Estimação de estados;
-* Modelagem de feeders reais.
+- Sistemas de distribuição;
+- Smart grids;
+- Identificação de parâmetros;
+- Estimação de estados;
+- Modelagem de feeders reais.
 
 ---
 
-# Autor
+# Autores
 
-Felipe Proença
-Cássio Gerez
-Camila Fantin
+- Felipe Proença
+- Cássio Gerez
+- Camila Fantin
