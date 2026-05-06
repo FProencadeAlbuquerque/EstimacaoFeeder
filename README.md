@@ -1,105 +1,123 @@
-# Formulação Matemática
+# EstimacaoFeeder
 
-## Potência Complexa
-
-A potência complexa em cada barra é definida como:
-
-$$
-S = P + jQ
-$$
-
-onde:
-
-- $P$ é a potência ativa;
-- $Q$ é a potência reativa.
-
-A relação entre tensão e corrente é dada por:
-
-$$
-S = VI^{*}
-$$
-
-onde:
-
-- $V$ é a tensão complexa;
-- $I^{*}$ é o conjugado da corrente.
+Projeto voltado à estimação de parâmetros elétricos de um feeder utilizando medições elétricas, fluxo de potência e técnicas de otimização e regressão.
 
 ---
 
-## Modelo de Linha
+# Objetivo
 
-O modelo do feeder pode ser representado por uma impedância série:
+O objetivo principal deste projeto é estimar parâmetros elétricos equivalentes de um sistema de distribuição a partir de medições de tensão, corrente e potência.
 
-$$
-Z = R + jX
-$$
+A metodologia considera:
 
-onde:
-
-- $R$ é a resistência da linha;
-- $X$ é a reatância da linha.
-
-A corrente elétrica é calculada por:
-
-$$
-I = \frac{S^{*}}{V^{*}}
-$$
-
-A queda de tensão ao longo do feeder é dada por:
-
-$$
-\Delta V = ZI
-$$
-
-resultando em:
-
-$$
-V_2 = V_1 - ZI
-$$
+- Modelagem elétrica do feeder;
+- Fluxo de potência;
+- Estimação iterativa de parâmetros;
+- Avaliação do erro entre valores medidos e calculados;
+- Comparação entre parâmetros reais e estimados.
 
 ---
 
-## Problema de Estimação
+# Descrição do Problema
 
-O problema consiste em encontrar os parâmetros $\theta$ que minimizam o erro entre os valores medidos e os valores estimados.
+O sistema elétrico é representado por um modelo equivalente contendo parâmetros como resistência e reatância das linhas do feeder.
 
-O vetor de parâmetros pode ser representado por:
+A partir das medições elétricas disponíveis, o algoritmo realiza:
 
-$$
-\theta = [R, X]^T
-$$
+- Cálculo das grandezas elétricas;
+- Estimação dos parâmetros do sistema;
+- Minimização do erro entre medições e valores calculados;
+- Avaliação da precisão da estimação.
 
-A função objetivo utilizada é baseada no erro quadrático:
+O projeto utiliza conceitos de:
 
-$$
-J(\theta)
-=
-\sum_{k=1}^{N}
-\left(
-z_k^{med}
--
-z_k^{calc}(\theta)
-\right)^2
-$$
-
-onde:
-
-- $z_k^{med}$ representa as medições;
-- $z_k^{calc}$ representa os valores calculados pelo modelo.
+- Potência complexa;
+- Impedância elétrica;
+- Fluxo de potência;
+- Estimação paramétrica;
+- Otimização numérica.
 
 ---
 
-## Erro Percentual
+# Estrutura do Projeto
 
-O erro relativo percentual é calculado por:
+```text
+EstimacaoFeeder/
+│
+├── Estima.ipynb
+├── Estima.py
+├── resultados_completos_0.01.csv
+├── README.md
+```
 
-$$
-\mathrm{Erro}(\%)
-=
-\frac{
-|x_{real} - x_{est}|
-}{
-|x_{real}|
-}
-\times 100
-$$
+---
+
+# Tecnologias Utilizadas
+
+- Python
+- NumPy
+- Pandas
+- SciPy
+- Matplotlib
+- Jupyter Notebook
+
+---
+
+# Execução
+
+## Clone o repositório
+
+```bash
+git clone https://github.com/FProencadeAlbuquerque/EstimacaoFeeder.git
+```
+
+## Acesse a pasta do projeto
+
+```bash
+cd EstimacaoFeeder
+```
+
+## Execute o notebook
+
+```bash
+jupyter notebook
+```
+
+ou execute diretamente o script Python:
+
+```bash
+python Estima.py
+```
+
+---
+
+# Resultados
+
+O projeto fornece:
+
+- Parâmetros estimados do feeder;
+- Erros percentuais;
+- Comparação entre valores reais e estimados;
+- Arquivos CSV contendo os resultados completos;
+- Avaliação do desempenho da metodologia de estimação.
+
+---
+
+# Aplicações
+
+A metodologia pode ser aplicada em:
+
+- Sistemas de distribuição;
+- Smart grids;
+- Identificação de parâmetros elétricos;
+- Estimação de estados;
+- Modelagem de feeders reais;
+- Estudos de operação e planejamento de sistemas elétricos.
+
+---
+
+# Autores
+
+- Felipe Proença
+- Cássio Gerez
+- Camila Fantin
