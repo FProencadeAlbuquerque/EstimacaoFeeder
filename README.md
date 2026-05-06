@@ -121,3 +121,4 @@ A metodologia pode ser aplicada em:
 - Felipe Proença
 - Cássio Gerez
 - Camila Fantin
+- Eduardo Coelho Marques da Costa
