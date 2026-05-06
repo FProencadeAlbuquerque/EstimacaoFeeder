@@ -122,3 +122,4 @@ A metodologia pode ser aplicada em:
 - Cássio Gerez
 - Camila Fantin
 - Eduardo Coelho Marques da Costa
+- Raoni florentino da silva teixeira
