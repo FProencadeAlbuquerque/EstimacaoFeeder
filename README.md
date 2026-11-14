@@ -44,9 +44,13 @@ O projeto utiliza conceitos de:
 ```text
 EstimacaoFeeder/
 │
-├── Estima.ipynb
-├── Estima.py
-├── resultados_completos_0.01.csv
+├── Dados13barras/                        # alimentador IEEE 13 barras
+│   ├── resultados_completos_0.01.csv     # dataset sem ruído
+│   ├── resultados_completos_com_ruido.csv
+│   └── erros_sistematicos_TI_seed1.csv   # erros sistemáticos sorteados para os TIs
+├── ComRuido.ipynb                        # adição de ruído de medição (µPMU + TI)
+├── Estima.ipynb                          # estimação com dados limpos
+├── Estima_Ruido.ipynb                    # estimação com dados ruidosos
 ├── README.md
 ```
 
