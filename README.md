@@ -48,6 +48,10 @@ EstimacaoFeeder/
 │   ├── resultados_completos_0.01.csv     # dataset sem ruído
 │   ├── resultados_completos_com_ruido.csv
 │   └── erros_sistematicos_TI_seed1.csv   # erros sistemáticos sorteados para os TIs
+├── DadosBelvedere/                       # alimentador real do Belvedere (Cuiabá)
+│   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # abas pert_0 a pert_0.09
+│   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # abas pert_0 e pert_0.10 a pert_0.19
+│   └── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # abas pert_0 e pert_0.20 a pert_0.29
 ├── ComRuido.ipynb                        # adição de ruído de medição (µPMU + TI)
 ├── Estima.ipynb                          # estimação com dados limpos
 ├── Estima_Ruido.ipynb                    # estimação com dados ruidosos
