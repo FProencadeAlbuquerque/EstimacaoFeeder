@@ -51,7 +51,11 @@ EstimacaoFeeder/
 ├── DadosBelvedere/                       # alimentador real do Belvedere (Cuiabá)
 │   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # abas pert_0 a pert_0.09
 │   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # abas pert_0 e pert_0.10 a pert_0.19
-│   └── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # abas pert_0 e pert_0.20 a pert_0.29
+│   ├── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # abas pert_0 e pert_0.20 a pert_0.29
+│   ├── Estima_Belvedere.ipynb       # E1 posição das µPMUs, E2 nível de perturbação, E3 ruído µPMU + TI
+│   ├── feederlib.py                 # dados, ruído (D'Antona et al., 2026), modelos, estimador bayesiano
+│   ├── resultados_belvedere.pkl     # resultados dos experimentos (RECALCULAR = True refaz, ~20 min)
+│   └── figuras/                     # figuras em PDF geradas pelo notebook
 ├── ComRuido.ipynb                        # adição de ruído de medição (µPMU + TI)
 ├── Estima.ipynb                          # estimação com dados limpos
 ├── Estima_Ruido.ipynb                    # estimação com dados ruidosos
