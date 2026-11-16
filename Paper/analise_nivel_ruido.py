@@ -52,8 +52,8 @@ rot = lambda a: 'noise-free' if a == 0 else f'{a:g}'
 linhas = [' & '.join([rot(a), '--' if a == 0 else f'{a:g}'] + [f'{T.loc[a, (c, m)]:.3f}' for c in CASOS for m in ('Ridge', 'Line-equation bound')]) + ' \\\\'
           for a in ALPHAS]
 tex = ['\\begin{table}[htbp]', '\\centering', '\\small',
-       '\\caption{Mean MAPE (\\%) versus the measurement-noise level ($K=1$, $\\mu$PMUs at both terminals, 1\\% parameter '
-       'spread). The noise scale $\\alpha$ multiplies all $\\mu$PMU and IT error bounds; the IT ratio error is $\\pm\\alpha$\\,\\%. '
+       '\\caption{Mean MAPE (\\%) versus the measurement-noise level ($K=1$, $\\mu$PMUs at both terminals). '
+       'The noise scale $\\alpha$ multiplies all $\\mu$PMU and IT error bounds; the IT ratio error is $\\pm\\alpha$\\,\\%. '
        'Training and test share the same realization of the systematic IT errors.}',
        '\\label{tab:e5}', '\\begin{tabular}{llrrrrrr}', '\\toprule',
        ' &  & \\multicolumn{2}{c}{IEEE 13-bus, $W=1$} & \\multicolumn{2}{c}{IEEE 13-bus, $W=5$} & \\multicolumn{2}{c}{Cuiabá feeder} \\\\',
@@ -64,23 +64,24 @@ tex = ['\\begin{table}[htbp]', '\\centering', '\\small',
 
 # figura
 plt.rcParams.update({'axes.spines.top': False, 'axes.spines.right': False, 'axes.grid': True, 'grid.alpha': 0.3,
-                     'font.size': 10, 'pdf.fonttype': 42})
+                     'font.size': 11, 'axes.titlesize': 11, 'pdf.fonttype': 42})
 A = ALPHAS[1:]
-fig, axs = plt.subplots(1, 3, figsize=(14, 4), sharey=True)
+fig, axs = plt.subplots(2, 2, figsize=(7.2, 6.6), sharey=True)
+axs = axs.ravel(); axs[3].axis('off')
 COR = {'Reactances': '#2a78d6', 'Self resistances': '#1baf7a', 'Mutual resistances': '#eb6834'}
 for ax, c in zip(axs, CASOS):
     Tc, Gc = T[c].loc[A], G[c].loc[A]
     if c.startswith('Cuiabá'):
         Tc, Gc = pd.concat([TC, Tc]), pd.concat([GC, Gc])
-    ax.plot(Tc.index, Tc['Ridge'], 'k-o', lw=2, ms=4, label='Ridge, all 12 parameters')
-    ax.plot(Tc.index, Tc['Line-equation bound'], '--s', color='#8a8984', ms=4, label='Line-equation bound')
+    ax.plot(Tc.index, Tc['Ridge'], 'k-o', lw=2.2, ms=5, label='Ridge, all 12 parameters')
+    ax.plot(Tc.index, Tc['Line-equation bound'], '--s', color='#8a8984', ms=5, lw=1.6, label='Line-equation bound')
     for g in fl.GRUPOS:
-        ax.plot(Gc.index, Gc[g], '-', color=COR[g], lw=1.2, marker='.', label=f'Ridge, {g.lower()}')
+        ax.plot(Gc.index, Gc[g], '-', color=COR[g], lw=1.5, marker='.', ms=7, label=f'Ridge, {g.lower()}')
     ax.axhline(T.loc[0.0, (c, 'Ridge')], color='k', ls='-.', lw=0.9, label='Ridge, noise-free')
     ax.axvline(1.0, color='#52514e', ls=':', lw=1)
-    ax.set_xscale('log'); ax.set_title(c); ax.set_xlabel('noise scale α  (IT ratio error = ±α %)')
-axs[0].set_ylabel('mean MAPE (%)'); axs[0].set_ylim(0, None)
-axs[0].text(1.0, 0.02, ' class-1 ITs', rotation=90, va='bottom', ha='right', fontsize=8, color='#52514e')
+    ax.set_xscale('log'); ax.set_title(c); ax.set_xlabel('noise scale α  (IT ratio error = ±α %)'); ax.tick_params(labelleft=True)
+axs[0].set_ylabel('mean MAPE (%)'); axs[2].set_ylabel('mean MAPE (%)'); axs[0].set_ylim(0, None)
+axs[0].text(1.0, 0.02, ' class-1 ITs', rotation=90, va='bottom', ha='right', fontsize=9, color='#52514e')
 h, l = axs[0].get_legend_handles_labels()
-fig.legend(h, l, loc='lower center', ncol=6, frameon=False, fontsize=8)
-plt.tight_layout(rect=(0, 0.07, 1, 1)); plt.savefig(AQUI / 'figures' / 'E5_noise_level.pdf', bbox_inches='tight')
+axs[3].legend(h, l, loc='center', frameon=False, fontsize=10)
+plt.tight_layout(); plt.savefig(AQUI / 'figures' / 'E5_noise_level.pdf', bbox_inches='tight')
