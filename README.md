@@ -27,11 +27,10 @@ O objetivo é estimar θ diretamente das medições das µPMUs, sem usar a equa�
 | Trecho | RG60 → 632 (2000 ft) | primeiro trecho do tronco (≈ 7,1 m) |
 | Origem | IEEE 13-bus test feeder | BDGD da distribuidora + OpenDSS |
 | Tensão nominal | 4,16 kV | 13,8 kV |
-| Perturbação dos parâmetros | 1 % | 1 % a 29 % |
-| Vetores de parâmetros por nível | 10 000 | 10 000 |
+| Vetores de parâmetros | 10 000 | 10 000 |
 | Pontos de operação por vetor | 5 (cargas variando ±30 %) | 1 (carga fixa) |
 
-Em cada amostra, os 12 parâmetros são perturbados de forma independente (gaussiana, com desvio-padrão relativo igual ao nível).
+Em cada amostra, os 12 parâmetros são perturbados de forma independente em torno do valor nominal (gaussiana, com desvio-padrão relativo de 1 %).
 
 - **Belvedere:** o fluxo de potência é resolvido com a carga fixa.
 - **IEEE 13 barras:** só o trecho 650632 recebe os parâmetros perturbados. Cada vetor é resolvido em 5 pontos de operação, com cada uma das 15 cargas multiplicada por um fator independente U(0,7; 1,3) e os reguladores ativos. Isso muda o desequilíbrio, de modo que as correntes dos 5 pontos são linearmente independentes, condição do Corolário 2 para identificar os 12 parâmetros (50 000 fluxos de potência).
@@ -69,11 +68,11 @@ EstimacaoFeeder/
 │   ├── resultados_completos_com_ruido.csv  # dataset antigo com ruído (gerado por ComRuido.ipynb)
 │   └── erros_sistematicos_TI_seed1.csv     # erros sistemáticos sorteados para os TIs
 ├── DadosBelvedere/                         # alimentador real do Belvedere
-│   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # abas pert_0.01 a pert_0.09
-│   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # abas pert_0.10 a pert_0.19
-│   ├── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # abas pert_0.20 a pert_0.29
+│   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # dados do OpenDSS (o artigo usa a aba pert_0.01)
+│   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # dados complementares, não usados no artigo
+│   ├── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # dados complementares, não usados no artigo
 │   ├── feederlib.py                # dados, ruído, modelos, estimador bayesiano e limite teórico
-│   ├── Estima_Belvedere.ipynb      # experimentos E1, E2 e E3
+│   ├── Estima_Belvedere.ipynb      # experimentos do Belvedere (posição das µPMUs e ruído)
 │   ├── resultados_belvedere.pkl    # resultados salvos dos experimentos
 │   └── figuras/                    # figuras em PDF geradas pelo notebook
 ├── Paper/
@@ -98,30 +97,27 @@ A aba `pert_0` das planilhas do Belvedere não tem variação dos parâmetros e 
 - `run_ieee13_snapshots.py`: roda os experimentos do artigo com W = 1 e W = 5 pontos de operação por amostra (posição das µPMUs, ruído com α ∈ {1; 0,1; 0,01} e K ∈ {1; 10; 100}). Leva cerca de 50 minutos e pode ser interrompido, porque os resultados vão sendo salvos.
 - `Estima_Snapshots.ipynb`: comparação direta entre 1 e 5 pontos de operação, com e sem ruído, incluindo um teste com entradas físicas (ΔV, corrente série e estimativas pela equação da linha).
 
-**IEEE 13 barras, dataset antigo** (um ponto de operação, perturbação no linecode mtx601 inteiro)
+**IEEE 13 barras, dataset antigo** (um ponto de operação; os parâmetros alterados valiam para o linecode mtx601 inteiro)
 - `Estima.ipynb`: estimação com os dados sem ruído.
 - `ComRuido.ipynb`: aplica o modelo de ruído (µPMU + TI) e gera `resultados_completos_com_ruido.csv`. A semente `IT_SEED` define a realização dos erros dos TIs.
 - `Estima_Ruido.ipynb`: compara os modelos com e sem ruído.
 
 **Belvedere** (`DadosBelvedere/Estima_Belvedere.ipynb`)
-- **E1, posição das µPMUs:** dois terminais, só o emissor e só o receptor; dados sem ruído e perturbação de 1 %.
-- **E2, nível de perturbação:** de 1 % a 29 %, sem ruído.
-- **E3, ruído de µPMU + TI:** α ∈ {1; 0,1; 0,01} e K ∈ {1; 10; 100}, com perturbações de 1 %, 9 % e 29 %.
+- **Posição das µPMUs:** dois terminais, só o emissor e só o receptor; dados sem ruído.
+- **Ruído de µPMU + TI:** α ∈ {1; 0,1; 0,01} e K ∈ {1; 10; 100}.
 
-O artigo usa só a perturbação de 1 % desse alimentador (E1 e E3 a 1 %); a varredura de perturbação continua no notebook como material complementar.
+O notebook também traz experimentos complementares (E2 e parte do E3) que não entram no artigo.
 
 **Nível de ruído** (`Paper/analise_nivel_ruido.py`)
 - Varre α de 0,01 a 5 (erro de relação dos TIs de ±0,01 % a ±5 %), com K = 1, para o Ridge e o limite da equação da linha, nos dois alimentadores (no Belvedere, a partir de α = 10⁻⁴).
 
-Os modelos são Ridge, MLP, LightGBM e Random Forest. A referência é o estimador bayesiano baseado na equação da linha, junto com o limite teórico de MAPE correspondente. Quando a medição não traz informação sobre um parâmetro, esse estimador devolve o valor a priori e o MAPE fica em cerca de 0,8 × perturbação (0,80 % para 1 %), o nível não informativo. Com W pontos de operação, as W equações da linha são empilhadas. A métrica é o MAPE por parâmetro no conjunto de teste (divisão 80/20 por vetor de parâmetros).
+Os modelos são Ridge, MLP, LightGBM e Random Forest. A referência é o estimador bayesiano baseado na equação da linha, junto com o limite teórico de MAPE correspondente. Quando a medição não traz informação sobre um parâmetro, esse estimador devolve o valor a priori e o MAPE fica em 0,80 % nestas bases, o nível não informativo. Com W pontos de operação, as W equações da linha são empilhadas. A métrica é o MAPE por parâmetro no conjunto de teste (divisão 80/20 por vetor de parâmetros).
 
 O notebook carrega os resultados de `resultados_belvedere.pkl`. Para refazer todos os experimentos (cerca de 20 minutos), use `RECALCULAR = True`.
 
 ---
 
 ## Principais resultados
-
-Perturbação de 1 % nos dois alimentadores; o nível não informativo é 0,80 %.
 
 - **Sem ruído:** o Ridge chega a 0,53 % nos dois trechos. Com um único ponto de operação, isso coincide com o estimador ótimo pela equação da linha: só seis combinações dos 12 parâmetros são identificáveis. As reatâncias são bem estimadas, as resistências próprias em parte e as mútuas não.
 - **Janela de 5 pontos de operação (IEEE 13):** os 12 parâmetros ficam identificáveis, e o estimador pela equação da linha empilhada os recupera quase exatamente (0,0004 %). Os modelos de ML com as medições brutas não aproveitam a janela e continuam em 0,53 %.

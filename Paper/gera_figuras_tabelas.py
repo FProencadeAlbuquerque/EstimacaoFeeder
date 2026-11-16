@@ -32,7 +32,7 @@ FIG, TAB = AQUI / 'figures', AQUI / 'tables'
 FIG.mkdir(exist_ok=True)
 TAB.mkdir(exist_ok=True)
 plt.rcParams.update({'figure.dpi': 110, 'axes.spines.top': False, 'axes.spines.right': False,
-                     'axes.grid': True, 'grid.alpha': 0.3, 'font.size': 10, 'pdf.fonttype': 42})
+                     'axes.grid': True, 'grid.alpha': 0.3, 'font.size': 11, 'axes.titlesize': 11, 'lines.linewidth': 1.8, 'lines.markersize': 6, 'pdf.fonttype': 42})
 COR = {'Ridge': '#2a78d6', 'MLP': '#eb6834', 'LightGBM': '#1baf7a', 'RandomForest': '#eda100',
        'Line-equation Bayes': '#6250d6', 'Line-equation bound': '#8a8984', 'Prior mean': '#52514e'}
 MODELOS = ['Ridge', 'MLP', 'LightGBM', 'RandomForest']
@@ -85,8 +85,8 @@ for case, d in E1.items():
 TABS['E1_placement'] = tex_table(
     [' &  &  & Reactances & Self resistances & Mutual resistances & All 12 parameters \\\\',
      'case & $\\mu$PMU placement & model &  &  &  &  \\\\'], rows,
-    'Mean MAPE (\\%) per parameter group for each $\\mu$PMU placement (noise-free data, 1\\% parameter '
-    f'spread). IEEE 13-bus: $W={W}$ operating points per sample; Cuiabá feeder: one operating point.',
+    'Mean MAPE (\\%) per parameter group for each $\\mu$PMU placement (noise-free data). '
+    f'IEEE 13-bus: $W={W}$ operating points per sample; Cuiabá feeder: one operating point.',
     'tab:e1', 'lllrrrr', midrules=(n_ieee,))
 
 for case, key in [('IEEE 13-bus', 'ieee13'), ('Cuiabá feeder', 'cuiaba')]:
@@ -147,7 +147,7 @@ for k, v in TABS.items():
     (TAB / f'{k}.tex').write_text(v)
 
 # ------------------------------------------------------------------ figuras
-fig, axs = plt.subplots(1, 2, figsize=(13, 4))
+fig, axs = plt.subplots(2, 1, figsize=(7, 6.6))
 for ax, (case, d) in zip(axs, E1.items()):
     cfgs, w = list(fl.CONFIGS), 0.2
     for k, m in enumerate(MODELOS):
@@ -158,10 +158,10 @@ for ax, (case, d) in zip(axs, E1.items()):
     ax.set_ylabel('Mean MAPE (%)')
     ax.set_title(case + (f' ($W={W}$ operating points)' if case.startswith('IEEE') else ''))
 h, l = axs[0].get_legend_handles_labels()
-fig.legend(h, l, loc='lower center', ncol=5, frameon=False, fontsize=8)
-plt.tight_layout(rect=(0, 0.07, 1, 1)); plt.savefig(FIG / 'E1_placement.pdf', bbox_inches='tight'); plt.close()
+fig.legend(h, l, loc='lower center', ncol=3, frameon=False, fontsize=10)
+plt.tight_layout(rect=(0, 0.08, 1, 1)); plt.savefig(FIG / 'E1_placement.pdf', bbox_inches='tight'); plt.close()
 
-fig, axs = plt.subplots(2, 1, figsize=(12, 7))
+fig, axs = plt.subplots(2, 1, figsize=(7.2, 7))
 for ax, (case, d) in zip(axs, E1.items()):
     t, w = d['both'], 0.14
     ms = MODELOS + REFS
@@ -169,10 +169,10 @@ for ax, (case, d) in zip(axs, E1.items()):
         ax.bar(np.arange(12) + (k - 2.5) * w, t[m], width=w - 0.02, color=COR[m], label=m)
     ax.set_xticks(range(12), PARAMS); ax.set_ylabel('MAPE (%)')
     extra = f', $W={W}$ operating points' if case.startswith('IEEE') else ''
-    ax.set_title(f'{case} — µPMUs at both terminals, 1 % parameter spread{extra}')
+    ax.set_title(f'{case} — µPMUs at both terminals{extra}')
 h, l = axs[0].get_legend_handles_labels()
-fig.legend(h, l, loc='lower center', ncol=6, frameon=False, fontsize=8)
-plt.tight_layout(rect=(0, 0.04, 1, 1)); plt.savefig(FIG / 'E1_per_parameter.pdf', bbox_inches='tight'); plt.close()
+fig.legend(h, l, loc='lower center', ncol=3, frameon=False, fontsize=10)
+plt.tight_layout(rect=(0, 0.07, 1, 1)); plt.savefig(FIG / 'E1_per_parameter.pdf', bbox_inches='tight'); plt.close()
 
 
 
@@ -191,9 +191,9 @@ def dV_theta_ieee(d):
 
 dvt_ie = dV_theta_ieee(ie)
 SNR = {}
-fig, axs = plt.subplots(1, 2, figsize=(11, 4.2))
-paineis = [('IEEE 13-bus, 1 % spread', (ie['V1'], ie['V2'], dvt_ie), True, RI[('E1', W, 'both')]),
-           ('Cuiabá feeder, 1 % spread', cu, 0.01, RB[('E1', 'both')])]
+fig, axs = plt.subplots(2, 1, figsize=(7, 7.8))
+paineis = [('IEEE 13-bus', (ie['V1'], ie['V2'], dvt_ie), True, RI[('E1', W, 'both')]),
+           ('Cuiabá feeder', cu, 0.01, RB[('E1', 'both')])]
 for ax, (nome, d, lvl, base) in zip(axs, paineis):
     ieee = lvl is True
     for K, mk in zip(KS, ['o', 's', '^']):
@@ -216,8 +216,8 @@ for ax, (nome, d, lvl, base) in zip(axs, paineis):
     ax.set_xscale('log'); ax.set_yscale('log')
     ax.set_xlabel('signal-to-noise ratio of ΔV'); ax.set_ylabel('mean MAPE (%)'); ax.set_title(nome)
 h, l = axs[0].get_legend_handles_labels()
-fig.legend(h, l, loc='lower center', ncol=4, frameon=False, fontsize=8)
-plt.tight_layout(rect=(0, 0.14, 1, 1)); plt.savefig(FIG / 'E3_noise.pdf', bbox_inches='tight'); plt.close()
+fig.legend(h, l, loc='lower center', ncol=2, frameon=False, fontsize=10)
+plt.tight_layout(rect=(0, 0.16, 1, 1)); plt.savefig(FIG / 'E3_noise.pdf', bbox_inches='tight'); plt.close()
 
 # ------------------------------------------------------------------ números citados no texto
 Is = ie['I1'] - ie['V1'] @ ie['Y_meio'].T
