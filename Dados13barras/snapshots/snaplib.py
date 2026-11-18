@@ -32,23 +32,35 @@ import feederlib as fl          # noqa: E402
 
 SEED, IT_SEED = 0, 1
 ARQ = AQUI / 'snapshots_0.01_K5.csv.gz'
-ELL = g.COMPRIMENTO_FT / 5280                       # milhas (θ em Ω/mi)
+ARQ_CUIABA = AQUI.parent.parent / 'DadosBelvedere' / 'snapshots_0.01_K5.csv.gz'
+ELL = g.COMPRIMENTO_FT / 5280                       # IEEE 13: milhas (θ em Ω/mi)
+CASOS = {
+    # barras dos terminais nas colunas de tensão
+    'ieee13': dict(arq=ARQ, b1='RG60', b2='632'),
+    # alimentador de Cuiabá (trecho 13806387, 7,13 m; θ em Ω/km). Os 5 pontos de operação multiplicam as
+    # cargas de cada fase por fatores fixos; a capacitância de um trecho de 7 m é desprezível (Y/2 = 0)
+    'cuiaba': dict(arq=ARQ_CUIABA, b1='barra1', b2='barra2'),
+}
 
 
-def carregar(arq=ARQ):
-    df = pd.read_csv(arq).sort_values(['theta_id', 'snapshot'])
+def carregar(caso='ieee13'):
+    c = CASOS[caso]
+    df = pd.read_csv(c['arq']).sort_values(['theta_id', 'snapshot'])
     n, P = df.theta_id.nunique(), df.snapshot.nunique()
     fas = lambda pares: np.stack([fl._fasor(df[m], df[a]) for m, a in pares], 1).reshape(n, P, 3)
-    d = dict(Y=df.groupby('theta_id')[g.PARAMS].first().values, n=n, P=P,
-             V1=fas([(f'V{j}_mag_RG60', f'V{j}_ang_RG60') for j in (1, 2, 3)]),
-             V2=fas([(f'V{j}_mag_632', f'V{j}_ang_632') for j in (1, 2, 3)]),
+    d = dict(caso=caso, Y=df.groupby('theta_id')[g.PARAMS].first().values, n=n, P=P,
+             V1=fas([(f'V{j}_mag_{c["b1"]}', f'V{j}_ang_{c["b1"]}') for j in (1, 2, 3)]),
+             V2=fas([(f'V{j}_mag_{c["b2"]}', f'V{j}_ang_{c["b2"]}') for j in (1, 2, 3)]),
              I1=fas([(f'I1_mag_fase{p}', f'I1_ang_fase{p}') for p in 'ABC']),
              I2=fas([(f'I2_mag_fase{p}', f'I2_ang_fase{p}') for p in 'ABC']))
-    import opendssdirect as dss
-    dss.Text.Command(f'redirect [{g.MASTER}]')
-    dss.Lines.Name(g.LINHA)
-    C = np.array(dss.Lines.CMatrix()).reshape(3, 3) * dss.Lines.Length() * 1e-9    # F no trecho
-    d['Y_meio'] = 1j * 2 * np.pi * 60 * C / 2
+    if caso == 'ieee13':
+        import opendssdirect as dss
+        dss.Text.Command(f'redirect [{g.MASTER}]')
+        dss.Lines.Name(g.LINHA)
+        C = np.array(dss.Lines.CMatrix()).reshape(3, 3) * dss.Lines.Length() * 1e-9    # F no trecho
+        d['Y_meio'], d['ell'] = 1j * 2 * np.pi * 60 * C / 2, ELL
+    else:
+        d['Y_meio'], d['ell'] = np.zeros((3, 3)), float(df['comprimento_km'].iloc[0])
     d['idx_tr'], d['idx_te'] = train_test_split(np.arange(n), test_size=0.2, random_state=SEED)
     return d
 
@@ -96,7 +108,7 @@ def bayes(F, d, W, alpha, K, idx):
     for m, i in enumerate(idx):
         V1, V2, I1 = F['V1'][i, :W], F['V2'][i, :W], F['I1'][i, :W]
         Is = I1 - V1 @ d['Y_meio'].T
-        J = np.vstack([fl.jacobiano(Is[k], ELL) for k in range(W)])
+        J = np.vstack([fl.jacobiano(Is[k], d['ell']) for k in range(W)])
         dV = V1 - V2
         y = np.concatenate([np.r_[v.real, v.imag] for v in dV])
         R = np.zeros((6 * W, 6 * W))
@@ -109,7 +121,7 @@ def bayes(F, d, W, alpha, K, idx):
                         A[6 * k + p, 2 * col], A[6 * k + p, 2 * col + 1] = z.real, -z.imag
                         A[6 * k + 3 + p, 2 * col], A[6 * k + 3 + p, 2 * col + 1] = z.imag, z.real
                     for q in range(3):
-                        z = -ELL * Z0[p, q] * Is[k, q]
+                        z = -d['ell'] * Z0[p, q] * Is[k, q]
                         col = 6 + q
                         A[6 * k + p, 2 * col] += z.real
                         A[6 * k + p, 2 * col + 1] += -z.imag

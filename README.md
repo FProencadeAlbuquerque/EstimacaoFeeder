@@ -28,11 +28,11 @@ O objetivo é estimar θ diretamente das medições das µPMUs, sem usar a equa�
 | Origem | IEEE 13-bus test feeder | BDGD da distribuidora + OpenDSS |
 | Tensão nominal | 4,16 kV | 13,8 kV |
 | Vetores de parâmetros | 10 000 | 10 000 |
-| Pontos de operação por vetor | 5 (cargas variando ±30 %) | 1 (carga fixa) |
+| Pontos de operação por vetor | 5 (cada carga variando ±30 %) | 5 (cargas de cada fase com fatores fixos) |
 
 Em cada amostra, os 12 parâmetros são perturbados de forma independente em torno do valor nominal (gaussiana, com desvio-padrão relativo de 1 %).
 
-- **Belvedere:** o fluxo de potência é resolvido com a carga fixa.
+- **Belvedere:** só o trecho 13806387 recebe os parâmetros perturbados. Cada vetor é resolvido em 5 pontos de operação, com as cargas de cada fase multiplicadas pelos fatores (1; 1; 1), (1,3; 0,7; 1), (0,7; 1; 1,3), (1; 1,3; 0,7) e (1,2; 0,8; 0,8), iguais para todos os vetores (50 000 fluxos de potência). Como a rede de média tensão é a três fios, as correntes não têm componente de sequência zero, ficam num subespaço de dimensão 2 e a impedância de sequência zero continua inobservável mesmo com os 5 pontos.
 - **IEEE 13 barras:** só o trecho 650632 recebe os parâmetros perturbados. Cada vetor é resolvido em 5 pontos de operação, com cada uma das 15 cargas multiplicada por um fator independente U(0,7; 1,3) e os reguladores ativos. Isso muda o desequilíbrio, de modo que as correntes dos 5 pontos são linearmente independentes, condição do Corolário 2 para identificar os 12 parâmetros (50 000 fluxos de potência).
 
 ---
@@ -68,12 +68,14 @@ EstimacaoFeeder/
 │   ├── resultados_completos_com_ruido.csv  # dataset antigo com ruído (gerado por ComRuido.ipynb)
 │   └── erros_sistematicos_TI_seed1.csv     # erros sistemáticos sorteados para os TIs
 ├── DadosBelvedere/                         # alimentador real do Belvedere
-│   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # dados do OpenDSS (o artigo usa a aba pert_0.01)
-│   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # dados complementares, não usados no artigo
-│   ├── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # dados complementares, não usados no artigo
+│   ├── snapshots_0.01_K5.csv.gz    # base usada no artigo: 10 000 vetores × 5 pontos de operação
+│   ├── run_cuiaba_snapshots.py     # experimentos do artigo → resultados_cuiaba_snapshots.pkl
+│   ├── 0_0_09_resultados_perturbacoes_potencia.xlsx    # base antiga (1 ponto de operação), não usada no artigo
+│   ├── 0_1_0_19_resultados_perturbacoes_potencia.xlsx  # base antiga, não usada no artigo
+│   ├── 0_2_0_29_resultados_perturbacoes_potencia.xlsx  # base antiga, não usada no artigo
 │   ├── feederlib.py                # dados, ruído, modelos, estimador bayesiano e limite teórico
-│   ├── Estima_Belvedere.ipynb      # experimentos do Belvedere (posição das µPMUs e ruído)
-│   ├── resultados_belvedere.pkl    # resultados salvos dos experimentos
+│   ├── Estima_Belvedere.ipynb      # experimentos com a base antiga (1 ponto de operação)
+│   ├── resultados_belvedere.pkl    # resultados da base antiga
 │   └── figuras/                    # figuras em PDF geradas pelo notebook
 ├── Paper/
 │   ├── gera_figuras_tabelas.py     # figuras e tabelas do artigo a partir dos .pkl
@@ -102,29 +104,25 @@ A aba `pert_0` das planilhas do Belvedere não tem variação dos parâmetros e 
 - `ComRuido.ipynb`: aplica o modelo de ruído (µPMU + TI) e gera `resultados_completos_com_ruido.csv`. A semente `IT_SEED` define a realização dos erros dos TIs.
 - `Estima_Ruido.ipynb`: compara os modelos com e sem ruído.
 
-**Belvedere** (`DadosBelvedere/Estima_Belvedere.ipynb`)
-- **Posição das µPMUs:** dois terminais, só o emissor e só o receptor; dados sem ruído.
-- **Ruído de µPMU + TI:** α ∈ {1; 0,1; 0,01} e K ∈ {1; 10; 100}.
-
-O notebook também traz experimentos complementares (E2 e parte do E3) que não entram no artigo.
+**Belvedere** (`DadosBelvedere/run_cuiaba_snapshots.py`)
+- Mesmos experimentos do IEEE 13 barras, com W = 1 e W = 5 pontos de operação: posição das µPMUs sem ruído e ruído com α ∈ {1; 0,1; 0,01} e K ∈ {1; 10; 100}. Usa a mesma biblioteca (`snaplib.carregar('cuiaba')`).
+- O notebook `Estima_Belvedere.ipynb` é da base antiga, com um ponto de operação, e não entra no artigo.
 
 **Nível de ruído** (`Paper/analise_nivel_ruido.py`)
-- Varre α de 0,01 a 5 (erro de relação dos TIs de ±0,01 % a ±5 %), com K = 1, para o Ridge e o limite da equação da linha, nos dois alimentadores (no Belvedere, a partir de α = 10⁻⁴).
+- Varre α de 0,01 a 5 (erro de relação dos TIs de ±0,01 % a ±5 %), com K = 1, para o Ridge e o limite da equação da linha, nos dois alimentadores e com W = 1 e W = 5 (no Belvedere, a partir de α = 10⁻⁴).
 
 Os modelos são Ridge, MLP, LightGBM e Random Forest. A referência é o estimador bayesiano baseado na equação da linha, junto com o limite teórico de MAPE correspondente. Quando a medição não traz informação sobre um parâmetro, esse estimador devolve o valor a priori e o MAPE fica em 0,80 % nestas bases, o nível não informativo. Com W pontos de operação, as W equações da linha são empilhadas. A métrica é o MAPE por parâmetro no conjunto de teste (divisão 80/20 por vetor de parâmetros).
-
-O notebook carrega os resultados de `resultados_belvedere.pkl`. Para refazer todos os experimentos (cerca de 20 minutos), use `RECALCULAR = True`.
 
 ---
 
 ## Principais resultados
 
-- **Sem ruído:** o Ridge chega a 0,53 % nos dois trechos. Com um único ponto de operação, isso coincide com o estimador ótimo pela equação da linha: só seis combinações dos 12 parâmetros são identificáveis. As reatâncias são bem estimadas, as resistências próprias em parte e as mútuas não.
-- **Janela de 5 pontos de operação (IEEE 13):** os 12 parâmetros ficam identificáveis, e o estimador pela equação da linha empilhada os recupera quase exatamente (0,0004 %). Os modelos de ML com as medições brutas não aproveitam a janela e continuam em 0,53 %.
-- **Posição das µPMUs:** uma µPMU só no terminal receptor mantém a maior parte da informação (0,63 % no IEEE 13 e 0,53 % no Belvedere). Só no emissor, o IEEE 13 fica no nível não informativo.
-- **Com ruído nominal (TIs classe 1):** o estimador pela equação da linha fica no nível não informativo. O Ridge, treinado e testado com os mesmos TIs, chega a 0,68 % com 5 pontos de operação e 0,75 % com 1. O que limita a estimação é a razão sinal-ruído da queda de tensão no trecho.
+- **Sem ruído, um ponto de operação:** o Ridge chega a 0,53 % nos dois trechos, o que coincide com o estimador ótimo pela equação da linha: só seis combinações dos 12 parâmetros são identificáveis. As reatâncias são bem estimadas, as resistências próprias em parte e as mútuas não.
+- **Janela de 5 pontos de operação:** no IEEE 13, os 12 parâmetros ficam identificáveis, e o estimador pela equação da linha empilhada os recupera quase exatamente (0,0004 %), mas os modelos de ML com as medições brutas não aproveitam a janela e continuam em 0,53 %. No Belvedere, a impedância de sequência zero continua inobservável (rede a três fios); o Ridge cai de 0,53 % para 0,29 %, perto da equação da linha (0,19 %; limite 0,23 %).
+- **Posição das µPMUs:** uma µPMU só no terminal receptor mantém a maior parte da informação (com 5 pontos: 0,63 % no IEEE 13 e 0,29 % no Belvedere). Só no emissor, o IEEE 13 fica no nível não informativo.
+- **Com ruído nominal (TIs classe 1):** o estimador pela equação da linha fica no nível não informativo. No IEEE 13, o Ridge, treinado e testado com os mesmos TIs, chega a 0,68 % com 5 pontos de operação e 0,75 % com 1; no Belvedere, todos os métodos ficam no nível não informativo. O que limita a estimação é a razão sinal-ruído da queda de tensão no trecho.
 - **Nível de ruído:** no IEEE 13, o Ridge mantém o desempenho sem ruído até α ≈ 0,1 (TIs classe 0,1), degrada aos poucos e perde toda a informação em α ≈ 5. As resistências próprias se perdem primeiro e as reatâncias por último; a janela de 5 pontos de operação aumenta a tolerância ao ruído.
-- **Belvedere:** o trecho de 7 m tem queda de tensão de cerca de 10⁻⁴ pu e é inobservável com µPMUs e TIs reais.
+- **Belvedere:** o trecho de 7 m tem queda de tensão de cerca de 10⁻⁴ pu e é inobservável com µPMUs e TIs reais; o ganho da janela de 5 pontos já se perde com α = 10⁻⁴.
 
 ---
 
@@ -141,7 +139,8 @@ Para refazer os resultados do IEEE 13 barras e as figuras e tabelas do artigo:
 
 ```bash
 cd Dados13barras/snapshots && python run_ieee13_snapshots.py
-cd ../../Paper && python gera_figuras_tabelas.py && python analise_nivel_ruido.py
+cd ../../DadosBelvedere && python run_cuiaba_snapshots.py
+cd ../Paper && python gera_figuras_tabelas.py && python analise_nivel_ruido.py
 ```
 
 Os notebooks do Belvedere devem ser executados de dentro da pasta `DadosBelvedere`, porque leem as planilhas e a `feederlib.py` da própria pasta.
