@@ -1,7 +1,7 @@
 """MAPE em função do nível de ruído (fator α sobre os erros de µPMU e TI; α = 1 é o nominal, TIs classe 1).
 
-Ridge e referência pela equação da linha, K = 1, µPMUs nos dois terminais, espalhamento de 1 %.
-IEEE 13 barras com W = 1 e W = 5 pontos de operação; alimentador de Cuiabá com 1 ponto.
+Ridge e referência pela equação da linha, K = 1, µPMUs nos dois terminais.
+IEEE 13 barras e alimentador de Cuiabá, cada um com W = 1 e W = 5 pontos de operação por amostra.
 Saídas: resultados_nivel_ruido.pkl, figures/E5_noise_level.pdf, tables/E5_noise_level.tex
 """
 import pickle, sys
@@ -18,70 +18,67 @@ from sklearn.linear_model import Ridge
 ALPHAS = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0]
 ALPHAS_CU = [1e-4, 3e-4, 1e-3, 3e-3]          # níveis extras só para o trecho curto de Cuiabá
 PKL = AQUI / 'resultados_nivel_ruido.pkl'
-so_ridge = lambda rapido=False: {'Ridge': Ridge(alpha=1e-3)}
+NOMES = {'ieee13': 'IEEE 13-bus', 'cuiaba': 'Cuiabá feeder'}
+CASOS = [f'{NOMES[c]}, W = {W}' for c in NOMES for W in (1, 5)]
 
 if PKL.exists():
     R = pickle.load(open(PKL, 'rb'))
 else:
     R = {}
-    fl.novos_modelos = so_ridge
-    ie, cu = sl.carregar(), fl.carregar(0.01, RAIZ / 'DadosBelvedere')
-    for a in ALPHAS:
-        for W in (1, 5):
-            R[(f'IEEE 13-bus, W = {W}', a)] = sl.experimento(ie, W, 'both', a, 1, log=lambda m: None)
-        R[('Cuiabá feeder', a)] = fl.experimento(cu, 'both', a, 1, modelos=so_ridge(), it_seeds_teste=())[0]
-        print(a, {k[0]: v.mean().round(3).to_dict() for k, v in R.items() if k[1] == a}, flush=True)
-    for a in ALPHAS_CU:
-        R[('Cuiabá feeder', a)] = fl.experimento(cu, 'both', a, 1, modelos=so_ridge(), it_seeds_teste=())[0]
+    fl.novos_modelos = lambda rapido=False: {'Ridge': Ridge(alpha=1e-3)}
+    for c, nome in NOMES.items():
+        d = sl.carregar(c)
+        for a in (ALPHAS_CU if c == 'cuiaba' else []) + ALPHAS:
+            for W in (1, 5):
+                R[(f'{nome}, W = {W}', a)] = sl.experimento(d, W, 'both', a, 1, log=lambda m: None)
+            print(nome, a, {k[0]: round(v['Ridge'].mean(), 3) for k, v in R.items() if k[1] == a}, flush=True)
     pickle.dump(R, open(PKL, 'wb'))
 
-CASOS = ['IEEE 13-bus, W = 1', 'IEEE 13-bus, W = 5', 'Cuiabá feeder']
 COLS = ['Ridge', 'Line-equation Bayes', 'Line-equation bound']
-T = pd.DataFrame({(c, m): [R[(c, a)][m].mean() for a in ALPHAS] for c in CASOS for m in COLS}, index=ALPHAS)
-print(T.round(3).to_string())
-G = pd.DataFrame({(c, g): [R[(c, a)].loc[ps, 'Ridge'].mean() for a in ALPHAS]
-                  for c in CASOS for g, ps in fl.GRUPOS.items()}, index=ALPHAS)
-print(G.round(3).to_string())
-TC = pd.DataFrame({m: [R[('Cuiabá feeder', a)][m].mean() for a in ALPHAS_CU] for m in COLS}, index=ALPHAS_CU)
-GC = pd.DataFrame({g: [R[('Cuiabá feeder', a)].loc[ps, 'Ridge'].mean() for a in ALPHAS_CU]
-                   for g, ps in fl.GRUPOS.items()}, index=ALPHAS_CU)
-print(TC.round(3).to_string())
+serie = lambda c: sorted(a for (cc, a) in R if cc == c and a > 0)
+T = {c: pd.DataFrame({m: [R[(c, a)][m].mean() for a in [0.0] + serie(c)] for m in COLS}, index=[0.0] + serie(c))
+     for c in CASOS}
+G = {c: pd.DataFrame({g: [R[(c, a)].loc[ps, 'Ridge'].mean() for a in [0.0] + serie(c)] for g, ps in fl.GRUPOS.items()},
+                     index=[0.0] + serie(c)) for c in CASOS}
+for c in CASOS:
+    print(c); print(pd.concat([T[c], G[c]], axis=1).round(3).to_string())
 
-# tabela
+# tabela (mesmos α nos quatro casos)
 rot = lambda a: 'noise-free' if a == 0 else f'{a:g}'
-linhas = [' & '.join([rot(a), '--' if a == 0 else f'{a:g}'] + [f'{T.loc[a, (c, m)]:.3f}' for c in CASOS for m in ('Ridge', 'Line-equation bound')]) + ' \\\\'
+linhas = [' & '.join([rot(a), '--' if a == 0 else f'{a:g}'] + [f'{T[c].loc[a, m]:.3f}' for c in CASOS
+                                                              for m in ('Ridge', 'Line-equation bound')]) + ' \\\\'
           for a in ALPHAS]
+cab = ' & '.join(f'\\multicolumn{{2}}{{c}}{{{c.split(",")[0]}, $W={c[-1]}$}}' for c in CASOS)
 tex = ['\\begin{table}[htbp]', '\\centering', '\\small',
        '\\caption{Mean MAPE (\\%) versus the measurement-noise level ($K=1$, $\\mu$PMUs at both terminals). '
        'The noise scale $\\alpha$ multiplies all $\\mu$PMU and IT error bounds; the IT ratio error is $\\pm\\alpha$\\,\\%. '
        'Training and test share the same realization of the systematic IT errors.}',
-       '\\label{tab:e5}', '\\begin{tabular}{llrrrrrr}', '\\toprule',
-       ' &  & \\multicolumn{2}{c}{IEEE 13-bus, $W=1$} & \\multicolumn{2}{c}{IEEE 13-bus, $W=5$} & \\multicolumn{2}{c}{Cuiabá feeder} \\\\',
-       '\\cmidrule(lr){3-4}\\cmidrule(lr){5-6}\\cmidrule(lr){7-8}',
-       '$\\alpha$ & IT ratio error (\\%) & ' + ' & '.join(['Ridge & Bound'] * 3) + ' \\\\', '\\midrule'] + linhas + \
-      ['\\bottomrule', '\\end{tabular}', '\\end{table}']
+       '\\label{tab:e5}', '\\resizebox{\\linewidth}{!}{%', '\\begin{tabular}{ll' + 'r' * 8 + '}', '\\toprule',
+       ' &  & ' + cab + ' \\\\',
+       ''.join(f'\\cmidrule(lr){{{3 + 2 * k}-{4 + 2 * k}}}' for k in range(4)),
+       '$\\alpha$ & IT ratio error (\\%) & ' + ' & '.join(['Ridge & Bound'] * 4) + ' \\\\', '\\midrule'] + linhas + \
+      ['\\bottomrule', '\\end{tabular}', '}', '\\end{table}']
 (AQUI / 'tables' / 'E5_noise_level.tex').write_text('\n'.join(tex) + '\n')
 
 # figura
 plt.rcParams.update({'axes.spines.top': False, 'axes.spines.right': False, 'axes.grid': True, 'grid.alpha': 0.3,
                      'font.size': 11, 'axes.titlesize': 11, 'pdf.fonttype': 42})
-A = ALPHAS[1:]
-fig, axs = plt.subplots(2, 2, figsize=(7.2, 6.6), sharey=True)
-axs = axs.ravel(); axs[3].axis('off')
 COR = {'Reactances': '#2a78d6', 'Self resistances': '#1baf7a', 'Mutual resistances': '#eb6834'}
-for ax, c in zip(axs, CASOS):
-    Tc, Gc = T[c].loc[A], G[c].loc[A]
-    if c.startswith('Cuiabá'):
-        Tc, Gc = pd.concat([TC, Tc]), pd.concat([GC, Gc])
+fig, axs = plt.subplots(2, 2, figsize=(7.2, 7.4), sharey=True)
+for ax, c in zip(axs.ravel(), CASOS):
+    Tc, Gc = T[c].drop(0.0), G[c].drop(0.0)
     ax.plot(Tc.index, Tc['Ridge'], 'k-o', lw=2.2, ms=5, label='Ridge, all 12 parameters')
     ax.plot(Tc.index, Tc['Line-equation bound'], '--s', color='#8a8984', ms=5, lw=1.6, label='Line-equation bound')
     for g in fl.GRUPOS:
         ax.plot(Gc.index, Gc[g], '-', color=COR[g], lw=1.5, marker='.', ms=7, label=f'Ridge, {g.lower()}')
-    ax.axhline(T.loc[0.0, (c, 'Ridge')], color='k', ls='-.', lw=0.9, label='Ridge, noise-free')
+    ax.axhline(T[c].loc[0.0, 'Ridge'], color='k', ls='-.', lw=0.9, label='Ridge, noise-free')
     ax.axvline(1.0, color='#52514e', ls=':', lw=1)
-    ax.set_xscale('log'); ax.set_title(c); ax.set_xlabel('noise scale α  (IT ratio error = ±α %)'); ax.tick_params(labelleft=True)
-axs[0].set_ylabel('mean MAPE (%)'); axs[2].set_ylabel('mean MAPE (%)'); axs[0].set_ylim(0, None)
-axs[0].text(1.0, 0.02, ' class-1 ITs', rotation=90, va='bottom', ha='right', fontsize=9, color='#52514e')
-h, l = axs[0].get_legend_handles_labels()
-axs[3].legend(h, l, loc='center', frameon=False, fontsize=10)
-plt.tight_layout(); plt.savefig(AQUI / 'figures' / 'E5_noise_level.pdf', bbox_inches='tight')
+    ax.set_xscale('log'); ax.set_title(c.replace('W = ', '$W=') + '$')
+    ax.set_xlabel('noise scale α  (IT ratio error = ±α %)'); ax.tick_params(labelleft=True)
+for ax in axs[:, 0]:
+    ax.set_ylabel('mean MAPE (%)')
+axs[0, 0].set_ylim(0, None)
+axs[0, 0].text(1.0, 0.02, ' class-1 ITs', rotation=90, va='bottom', ha='right', fontsize=9, color='#52514e')
+h, l = axs[0, 0].get_legend_handles_labels()
+fig.legend(h, l, loc='lower center', ncol=2, frameon=False, fontsize=10)
+plt.tight_layout(rect=(0, 0.12, 1, 1)); plt.savefig(AQUI / 'figures' / 'E5_noise_level.pdf', bbox_inches='tight')

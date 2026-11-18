@@ -1,7 +1,7 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption{Mean MAPE (\%) per parameter group for each $\mu$PMU placement (noise-free data). IEEE 13-bus: $W=5$ operating points per sample; Cuiabá feeder: one operating point.}
+\caption{Mean MAPE (\%) per parameter group for each $\mu$PMU placement (noise-free data, $W=5$ operating points per sample).}
 \label{tab:e1}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lllrrrr}
@@ -24,20 +24,20 @@ IEEE 13-bus & $\mu$PMU at receiving end only & MLP & 0.522 & 0.779 & 0.792 & 0.6
 IEEE 13-bus & $\mu$PMU at receiving end only & LightGBM & 0.627 & 0.797 & 0.794 & 0.712 \\
 IEEE 13-bus & $\mu$PMU at receiving end only & RandomForest & 0.726 & 0.804 & 0.793 & 0.762 \\
 \midrule
-Cuiabá feeder & $\mu$PMU at both terminals & Ridge & 0.346 & 0.642 & 0.791 & 0.531 \\
-Cuiabá feeder & $\mu$PMU at both terminals & MLP & 0.353 & 0.644 & 0.795 & 0.537 \\
-Cuiabá feeder & $\mu$PMU at both terminals & LightGBM & 0.356 & 0.655 & 0.808 & 0.544 \\
-Cuiabá feeder & $\mu$PMU at both terminals & RandomForest & 0.362 & 0.664 & 0.806 & 0.549 \\
-Cuiabá feeder & $\mu$PMU at both terminals & Line-equation Bayes & 0.346 & 0.642 & 0.790 & 0.531 \\
-Cuiabá feeder & $\mu$PMU at both terminals & Line-equation bound & 0.343 & 0.631 & 0.791 & 0.527 \\
-Cuiabá feeder & $\mu$PMU at sending end only & Ridge & 0.359 & 0.642 & 0.791 & 0.537 \\
-Cuiabá feeder & $\mu$PMU at sending end only & MLP & 0.577 & 0.657 & 0.796 & 0.652 \\
-Cuiabá feeder & $\mu$PMU at sending end only & LightGBM & 0.585 & 0.670 & 0.811 & 0.662 \\
-Cuiabá feeder & $\mu$PMU at sending end only & RandomForest & 0.591 & 0.677 & 0.812 & 0.668 \\
-Cuiabá feeder & $\mu$PMU at receiving end only & Ridge & 0.346 & 0.642 & 0.791 & 0.531 \\
-Cuiabá feeder & $\mu$PMU at receiving end only & MLP & 0.349 & 0.645 & 0.793 & 0.534 \\
-Cuiabá feeder & $\mu$PMU at receiving end only & LightGBM & 0.357 & 0.659 & 0.808 & 0.545 \\
-Cuiabá feeder & $\mu$PMU at receiving end only & RandomForest & 0.364 & 0.671 & 0.806 & 0.551 \\
+Cuiabá feeder & $\mu$PMU at both terminals & Ridge & 0.295 & 0.107 & 0.447 & 0.286 \\
+Cuiabá feeder & $\mu$PMU at both terminals & MLP & 0.333 & 0.263 & 0.761 & 0.422 \\
+Cuiabá feeder & $\mu$PMU at both terminals & LightGBM & 0.351 & 0.604 & 0.791 & 0.524 \\
+Cuiabá feeder & $\mu$PMU at both terminals & RandomForest & 0.357 & 0.639 & 0.789 & 0.535 \\
+Cuiabá feeder & $\mu$PMU at both terminals & Line-equation Bayes & 0.103 & 0.104 & 0.436 & 0.187 \\
+Cuiabá feeder & $\mu$PMU at both terminals & Line-equation bound & 0.182 & 0.106 & 0.443 & 0.228 \\
+Cuiabá feeder & $\mu$PMU at sending end only & Ridge & 0.321 & 0.184 & 0.544 & 0.342 \\
+Cuiabá feeder & $\mu$PMU at sending end only & MLP & 0.464 & 0.308 & 0.741 & 0.494 \\
+Cuiabá feeder & $\mu$PMU at sending end only & LightGBM & 0.576 & 0.638 & 0.794 & 0.646 \\
+Cuiabá feeder & $\mu$PMU at sending end only & RandomForest & 0.584 & 0.657 & 0.794 & 0.655 \\
+Cuiabá feeder & $\mu$PMU at receiving end only & Ridge & 0.296 & 0.107 & 0.447 & 0.287 \\
+Cuiabá feeder & $\mu$PMU at receiving end only & MLP & 0.339 & 0.135 & 0.508 & 0.330 \\
+Cuiabá feeder & $\mu$PMU at receiving end only & LightGBM & 0.351 & 0.597 & 0.791 & 0.522 \\
+Cuiabá feeder & $\mu$PMU at receiving end only & RandomForest & 0.357 & 0.651 & 0.790 & 0.539 \\
 \bottomrule
 \end{tabular}
 }

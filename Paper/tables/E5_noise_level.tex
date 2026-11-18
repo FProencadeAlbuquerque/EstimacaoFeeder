@@ -3,22 +3,24 @@
 \small
 \caption{Mean MAPE (\%) versus the measurement-noise level ($K=1$, $\mu$PMUs at both terminals). The noise scale $\alpha$ multiplies all $\mu$PMU and IT error bounds; the IT ratio error is $\pm\alpha$\,\%. Training and test share the same realization of the systematic IT errors.}
 \label{tab:e5}
-\begin{tabular}{llrrrrrr}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llrrrrrrrr}
 \toprule
- &  & \multicolumn{2}{c}{IEEE 13-bus, $W=1$} & \multicolumn{2}{c}{IEEE 13-bus, $W=5$} & \multicolumn{2}{c}{Cuiabá feeder} \\
-\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
-$\alpha$ & IT ratio error (\%) & Ridge & Bound & Ridge & Bound & Ridge & Bound \\
+ &  & \multicolumn{2}{c}{IEEE 13-bus, $W=1$} & \multicolumn{2}{c}{IEEE 13-bus, $W=5$} & \multicolumn{2}{c}{Cuiabá feeder, $W=1$} & \multicolumn{2}{c}{Cuiabá feeder, $W=5$} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}
+$\alpha$ & IT ratio error (\%) & Ridge & Bound & Ridge & Bound & Ridge & Bound & Ridge & Bound \\
 \midrule
-noise-free & -- & 0.534 & 0.530 & 0.534 & 0.005 & 0.531 & 0.527 \\
-0.01 & 0.01 & 0.534 & 0.539 & 0.535 & 0.249 & 0.782 & 0.796 \\
-0.02 & 0.02 & 0.535 & 0.563 & 0.535 & 0.380 & 0.796 & 0.796 \\
-0.05 & 0.05 & 0.540 & 0.644 & 0.537 & 0.555 & 0.800 & 0.796 \\
-0.1 & 0.1 & 0.555 & 0.723 & 0.540 & 0.670 & 0.801 & 0.796 \\
-0.2 & 0.2 & 0.595 & 0.773 & 0.552 & 0.749 & 0.801 & 0.796 \\
-0.5 & 0.5 & 0.690 & 0.794 & 0.604 & 0.789 & 0.802 & 0.796 \\
-1 & 1 & 0.752 & 0.798 & 0.675 & 0.797 & 0.802 & 0.796 \\
-2 & 2 & 0.784 & 0.799 & 0.743 & 0.799 & 0.802 & 0.796 \\
-5 & 5 & 0.797 & 0.799 & 0.791 & 0.799 & 0.802 & 0.796 \\
+noise-free & -- & 0.534 & 0.530 & 0.534 & 0.005 & 0.526 & 0.530 & 0.286 & 0.228 \\
+0.01 & 0.01 & 0.534 & 0.539 & 0.535 & 0.249 & 0.776 & 0.800 & 0.738 & 0.800 \\
+0.02 & 0.02 & 0.535 & 0.563 & 0.535 & 0.380 & 0.790 & 0.800 & 0.778 & 0.800 \\
+0.05 & 0.05 & 0.540 & 0.644 & 0.537 & 0.555 & 0.794 & 0.800 & 0.796 & 0.800 \\
+0.1 & 0.1 & 0.555 & 0.723 & 0.540 & 0.670 & 0.795 & 0.800 & 0.799 & 0.800 \\
+0.2 & 0.2 & 0.595 & 0.773 & 0.552 & 0.749 & 0.795 & 0.800 & 0.800 & 0.800 \\
+0.5 & 0.5 & 0.690 & 0.794 & 0.604 & 0.789 & 0.795 & 0.800 & 0.801 & 0.800 \\
+1 & 1 & 0.752 & 0.798 & 0.675 & 0.797 & 0.795 & 0.800 & 0.802 & 0.800 \\
+2 & 2 & 0.784 & 0.799 & 0.743 & 0.799 & 0.795 & 0.800 & 0.802 & 0.800 \\
+5 & 5 & 0.797 & 0.799 & 0.791 & 0.799 & 0.795 & 0.800 & 0.803 & 0.800 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
